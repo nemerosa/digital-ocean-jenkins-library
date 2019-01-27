@@ -13,7 +13,7 @@ def call(Map<String, ?> params, Closure body) {
     String region = ParamUtils.getParam(params, "region")
     String version = ParamUtils.getParam(params, "version", "1.13.1-do.2")
 
-    List<String> tags = params.tags as List<String> ?: []
+    List<String> tags = params.tags.collect { it as String } ?: []
 
     String configFile = ParamUtils.getParam(params, "configFile", ".kubeconfig")
 
@@ -42,6 +42,7 @@ def call(Map<String, ?> params, Closure body) {
         echo "DO K8S Cluster - region: $region"
         echo "DO K8S Cluster - version: $version"
         echo "DO K8S Cluster - destroy: $destroy"
+        echo "DO K8S Cluster - tags: $tags"
         if (verbose) {
             pools.each { pool ->
                 echo "DO K8S Cluster Pool - name: $pool.name"
