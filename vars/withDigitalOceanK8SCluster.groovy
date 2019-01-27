@@ -6,6 +6,7 @@ def call(Map<String, ?> params, Closure body) {
 
     boolean logging = ParamUtils.getBooleanParam(params, "logging", false)
     boolean destroy = ParamUtils.getBooleanParam(params, "destroy", true)
+    String credentials = ParamUtils.getParam(params, "credentials")
     String name = ParamUtils.getParam(params, "name")
     String region = ParamUtils.getParam(params, "region")
     String version = ParamUtils.getParam(params, "region", "1.13.1-do.2")
@@ -39,35 +40,40 @@ def call(Map<String, ?> params, Closure body) {
         }
     }
 
-    // Creating the cluster
-    if (logging) {
-        echo "DO K8S Cluster - creation..."
-    }
-    def clusterCreationResponse = httpRequest(
-            url: "$url",
-            acceptType: "APPLICATION_JSON",
-            customHeaders: [[
-                                    name     : "Authentication",
-                                    value    : "Bearer $token",
-                                    maskValue: true,
-                            ]],
-            httpMode: "POST",
-            requestBody: JsonUtils.toJsonString([
-                    name      : name,
-                    region    : region,
-                    version   : version,
-                    node_pools: pools.collect { pool ->
-                        [
-                                name : pool.name,
-                                count: pool.count,
-                                size : pool.size,
-                        ]
-                    }
-            ]),
-    )
-    def clusterCreation = readJSON(text: clusterCreationResponse.content)
-    def clusterId = clusterCreation.kubernetes_cluster.id as String
-    if (logging) {
-        echo "DO K8S Cluster - id: $clusterId"
+    // Authentication
+    withCredentials([string(credentialsId: credentials, variable: 'TOKEN')]) {
+
+        // Creating the cluster
+        if (logging) {
+            echo "DO K8S Cluster - creation..."
+        }
+        def clusterCreationResponse = httpRequest(
+                url: "$url",
+                acceptType: "APPLICATION_JSON",
+                customHeaders: [[
+                                        name     : "Authentication",
+                                        value    : "Bearer ${TOKEN}",
+                                        maskValue: true,
+                                ]],
+                httpMode: "POST",
+                requestBody: JsonUtils.toJsonString([
+                        name      : name,
+                        region    : region,
+                        version   : version,
+                        node_pools: pools.collect { pool ->
+                            [
+                                    name : pool.name,
+                                    count: pool.count,
+                                    size : pool.size,
+                            ]
+                        }
+                ]),
+        )
+        def clusterCreation = readJSON(text: clusterCreationResponse.content)
+        def clusterId = clusterCreation.kubernetes_cluster.id as String
+        if (logging) {
+            echo "DO K8S Cluster - id: $clusterId"
+        }
+
     }
 }
