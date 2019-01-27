@@ -12,6 +12,8 @@ def call(Map<String, ?> params, Closure body) {
     String region = ParamUtils.getParam(params, "region")
     String version = ParamUtils.getParam(params, "version", "1.13.1-do.2")
 
+    List<String> tags = params.tags as List<String> ?: []
+
     String url = "https://api.digitalocean.com/v2/kubernetes/clusters"
 
     int retries = ParamUtils.getIntParam(params, "retries", 20)
@@ -55,6 +57,7 @@ def call(Map<String, ?> params, Closure body) {
                 name      : name,
                 region    : region,
                 version   : version,
+                tags      : tags,
                 node_pools: pools.collect { pool ->
                     [
                             name : pool.name,
