@@ -14,7 +14,7 @@ def call(Map<String, ?> params, Closure body) {
 
     String url = "https://api.digitalocean.com/v2/kubernetes/clusters"
 
-    int retries = ParamUtils.getIntParam(params, "retries", 10)
+    int retries = ParamUtils.getIntParam(params, "retries", 20)
     int interval = ParamUtils.getIntParam(params, "interval", 30)
 
     List<K8SPool> pools = []
