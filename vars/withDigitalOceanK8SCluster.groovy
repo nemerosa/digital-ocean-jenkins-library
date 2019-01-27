@@ -21,7 +21,7 @@ def call(Map<String, ?> params, Closure body) {
     def poolDefs = params.pools
     if (poolDefs && poolDefs instanceof Collection) {
         poolDefs.each { poolDef ->
-            pool = new K8SPool(
+            def pool = new K8SPool(
                     ParamUtils.getParam(poolDef as Map<String, ?>, "name"),
                     ParamUtils.getIntParam(poolDef as Map<String, ?>, "count"),
                     ParamUtils.getParam(poolDef as Map<String, ?>, "size"),
