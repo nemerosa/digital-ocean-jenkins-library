@@ -59,9 +59,9 @@ def call(Map<String, ?> params, Closure body) {
                     ]
                 }
         ])
-        if (logging) {
-            echo "DO K8S Cluster - request: $clusterCreationRequest"
-        }
+        // if (logging) {
+        //     echo "DO K8S Cluster - request: $clusterCreationRequest"
+        // }
         def clusterCreationResponse = httpRequest(
                 url: "$url",
                 acceptType: "APPLICATION_JSON",
