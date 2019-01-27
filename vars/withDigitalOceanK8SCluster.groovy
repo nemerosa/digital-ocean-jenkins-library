@@ -93,7 +93,7 @@ def call(Map<String, ?> params, Closure body) {
             while (status != "running" && tries < retries) {
                 tries++
                 if (logging) {
-                    echo "DO K8S Cluster - waiting $interval seconds for running status..."
+                    echo "DO K8S Cluster - ($tries/$retries) waiting $interval seconds for running cluster..."
                 }
                 //noinspection GroovyAssignabilityCheck
                 sleep(time: interval, unit: 'SECONDS')
