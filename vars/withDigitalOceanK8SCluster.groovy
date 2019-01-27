@@ -13,6 +13,9 @@ def call(Map<String, ?> params, Closure body) {
 
     String url = "https://api.digitalocean.com/v2/kubernetes/clusters"
 
+    int retries = ParamUtils.getIntParam(params, "retries", 10)
+    int interval = ParamUtils.getIntParam(params, "interval", 30)
+
     List<K8SPool> pools = []
     def poolDefs = params.pools
     if (poolDefs && poolDefs instanceof Collection) {
@@ -78,6 +81,40 @@ def call(Map<String, ?> params, Closure body) {
         def clusterId = clusterCreation.kubernetes_cluster.id as String
         if (logging) {
             echo "DO K8S Cluster - id: $clusterId"
+        }
+
+        // Waiting for the cluster to be ready
+
+        String status = ""
+        int tries = 0
+        while (status != "running" && tries < retries) {
+            tries++
+            if (logging) {
+                echo "DO K8S Cluster - waiting $interval seconds for running status..."
+            }
+            //noinspection GroovyAssignabilityCheck
+            sleep(time: interval, unit: 'SECONDS')
+            def clusterStatusResponse = httpRequest(
+                    url: "$url/$clusterId",
+                    acceptType: "APPLICATION_JSON",
+                    customHeaders: [[
+                                            name     : "Authorization",
+                                            value    : "Bearer ${TOKEN}",
+                                            maskValue: true,
+                                    ]],
+                    httpMode: "GET",
+            )
+            def clusterStatus = readJSON(text: clusterStatusResponse.content)
+            status = clusterStatus.kubernetes_cluster.status.state
+            if (logging) {
+                echo "DO K8S Cluster - status = $status"
+            }
+        }
+
+        if (status != "running") {
+            throw new IllegalStateException("Could not create the cluster in less than ${retries * interval} seconds.")
+        } else if (logging) {
+            echo "DO K8S Cluster - running"
         }
 
     }

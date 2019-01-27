@@ -39,4 +39,13 @@ class ParamUtils {
             throw new IllegalArgumentException("Missing parameter: $key")
         }
     }
+
+    static int getIntParam(Map<String, ?> params, String key, int defaultValue) {
+        def value = params.get(key)
+        if (value != null) {
+            return value as int
+        } else {
+            return defaultValue
+        }
+    }
 }
