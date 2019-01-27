@@ -51,7 +51,7 @@ def call(Map<String, ?> params, Closure body) {
                 url: "$url",
                 acceptType: "APPLICATION_JSON",
                 customHeaders: [[
-                                        name     : "Authentication",
+                                        name     : "Authorization",
                                         value    : "Bearer ${TOKEN}",
                                         maskValue: true,
                                 ]],
