@@ -56,6 +56,7 @@ def call(Map<String, ?> params, Closure body) {
                                         maskValue: true,
                                 ]],
                 httpMode: "POST",
+                contentType: "APPLICATION_JSON",
                 requestBody: JsonUtils.toJsonString([
                         name      : name,
                         region    : region,
