@@ -4,12 +4,10 @@ class K8SCluster {
 
     private final Map<String, ?> params
     private final String id
-    private final String config
 
-    K8SCluster(Map<String, ?> params, String id, String config) {
+    K8SCluster(Map<String, ?> params, String id) {
         this.params = params
         this.id = id
-        this.config = config
     }
 
     Map<String, ?> getParams() {
@@ -18,9 +16,5 @@ class K8SCluster {
 
     String getId() {
         return id
-    }
-
-    String getConfig() {
-        return config
     }
 }

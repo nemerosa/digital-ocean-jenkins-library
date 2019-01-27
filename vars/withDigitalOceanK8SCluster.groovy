@@ -6,6 +6,7 @@ import net.nemerosa.jenkins.pipeline.digitalocean.k8s.K8SPool
 def call(Map<String, ?> params, Closure body) {
 
     boolean logging = ParamUtils.getBooleanParam(params, "logging", false)
+    boolean verbose = ParamUtils.getBooleanParam(params, "verbose", false)
     boolean destroy = ParamUtils.getBooleanParam(params, "destroy", true)
     String credentials = ParamUtils.getParam(params, "credentials")
     String name = ParamUtils.getParam(params, "name")
@@ -13,6 +14,8 @@ def call(Map<String, ?> params, Closure body) {
     String version = ParamUtils.getParam(params, "version", "1.13.1-do.2")
 
     List<String> tags = params.tags as List<String> ?: []
+
+    String configFile = ParamUtils.getParam(params, "configFile", ".kubeconfig")
 
     String url = "https://api.digitalocean.com/v2/kubernetes/clusters"
 
@@ -39,10 +42,12 @@ def call(Map<String, ?> params, Closure body) {
         echo "DO K8S Cluster - region: $region"
         echo "DO K8S Cluster - version: $version"
         echo "DO K8S Cluster - destroy: $destroy"
-        pools.each { pool ->
-            echo "DO K8S Cluster Pool - name: $pool.name"
-            echo "DO K8S Cluster Pool - count: $pool.count"
-            echo "DO K8S Cluster Pool - size: $pool.size"
+        if (verbose) {
+            pools.each { pool ->
+                echo "DO K8S Cluster Pool - name: $pool.name"
+                echo "DO K8S Cluster Pool - count: $pool.count"
+                echo "DO K8S Cluster Pool - size: $pool.size"
+            }
         }
     }
 
@@ -50,7 +55,7 @@ def call(Map<String, ?> params, Closure body) {
     withCredentials([string(credentialsId: credentials, variable: 'TOKEN')]) {
 
         // Creating the cluster
-        if (logging) {
+        if (logging && verbose) {
             echo "DO K8S Cluster - creation..."
         }
         def clusterCreationRequest = JsonUtils.toJsonString([
@@ -66,9 +71,9 @@ def call(Map<String, ?> params, Closure body) {
                     ]
                 }
         ])
-        // if (logging) {
-        //     echo "DO K8S Cluster - request: $clusterCreationRequest"
-        // }
+        if (logging && verbose) {
+            echo "DO K8S Cluster - request: $clusterCreationRequest"
+        }
         def clusterCreationResponse = httpRequest(
                 url: "$url",
                 acceptType: "APPLICATION_JSON",
@@ -95,7 +100,7 @@ def call(Map<String, ?> params, Closure body) {
             int tries = 0
             while (status != "running" && tries < retries) {
                 tries++
-                if (logging) {
+                if (logging && verbose) {
                     echo "DO K8S Cluster - ($tries/$retries) waiting $interval seconds for running cluster..."
                 }
                 //noinspection GroovyAssignabilityCheck
@@ -112,20 +117,20 @@ def call(Map<String, ?> params, Closure body) {
                 )
                 def clusterStatus = readJSON(text: clusterStatusResponse.content)
                 status = clusterStatus.kubernetes_cluster.status.state
-                if (logging) {
+                if (logging && verbose) {
                     echo "DO K8S Cluster - status = $status"
                 }
             }
 
             if (status != "running") {
                 throw new IllegalStateException("Could not create the cluster in less than ${retries * interval} seconds.")
-            } else if (logging) {
+            } else if (logging && verbose) {
                 echo "DO K8S Cluster - running"
             }
 
             // Getting the configuration file
 
-            if (logging) {
+            if (logging && verbose) {
                 echo "DO K8S Cluster - getting connection configuration..."
             }
             def clusterConfigResponse = httpRequest(
@@ -139,14 +144,21 @@ def call(Map<String, ?> params, Closure body) {
             )
             def clusterConfig = clusterConfigResponse.content as String
 
+            // Writes configuration in file
+            writeFile(file: configFile, text: clusterConfig)
+            if (logging && verbose) {
+                echo "DO K8S Cluster - cluster $clusterId config written in $configFile"
+            }
+
             // OK, consolidate the cluster information
             def cluster = new K8SCluster(
                     params,
-                    clusterId,
-                    clusterConfig
+                    clusterId
             )
 
-            echo "DO K8S Cluster - cluster $clusterId being ready."
+            if (logging) {
+                echo "DO K8S Cluster - cluster $clusterId being ready."
+            }
 
             // Runs the code
             body(cluster)
