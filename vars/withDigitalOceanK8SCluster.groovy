@@ -1,5 +1,6 @@
 import net.nemerosa.jenkins.pipeline.digitalocean.JsonUtils
 import net.nemerosa.jenkins.pipeline.digitalocean.ParamUtils
+import net.nemerosa.jenkins.pipeline.digitalocean.k8s.K8SCluster
 import net.nemerosa.jenkins.pipeline.digitalocean.k8s.K8SPool
 
 def call(Map<String, ?> params, Closure body) {
@@ -116,6 +117,32 @@ def call(Map<String, ?> params, Closure body) {
         } else if (logging) {
             echo "DO K8S Cluster - running"
         }
+
+        // Getting the configuration file
+
+        if (logging) {
+            echo "DO K8S Cluster - getting connection configuration..."
+        }
+        def clusterConfigResponse = httpRequest(
+                url: "$url/$clusterId/kubeconfig",
+                customHeaders: [[
+                                        name     : "Authorization",
+                                        value    : "Bearer ${TOKEN}",
+                                        maskValue: true,
+                                ]],
+                httpMode: "GET",
+        )
+        def clusterConfig = clusterConfigResponse.content as String
+
+        // OK, consolidate the cluster information
+        def cluster = new K8SCluster(
+                params,
+                clusterId,
+                clusterConfig
+        )
+
+        // Runs the code
+        body(cluster)
 
     }
 }
