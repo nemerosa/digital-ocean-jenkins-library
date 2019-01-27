@@ -14,9 +14,9 @@ def call(Map<String, ?> params, Closure body) {
     if (poolDefs && poolDefs instanceof Collection) {
         poolDefs.each { poolDef ->
             pool = new K8SPool(
-                    name: ParamUtils.getParam(poolDef as Map<String, ?>, "name"),
-                    count: ParamUtils.getIntParam(poolDef as Map<String, ?>, "count"),
-                    size: ParamUtils.getParam(poolDef as Map<String, ?>, "size"),
+                    ParamUtils.getParam(poolDef as Map<String, ?>, "name"),
+                    ParamUtils.getIntParam(poolDef as Map<String, ?>, "count"),
+                    ParamUtils.getParam(poolDef as Map<String, ?>, "size"),
             )
             pools.add(pool)
         }
