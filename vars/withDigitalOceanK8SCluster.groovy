@@ -84,20 +84,49 @@ def call(Map<String, ?> params, Closure body) {
             echo "DO K8S Cluster - id: $clusterId"
         }
 
-        // Waiting for the cluster to be ready
+        try {
 
-        String status = ""
-        int tries = 0
-        while (status != "running" && tries < retries) {
-            tries++
-            if (logging) {
-                echo "DO K8S Cluster - waiting $interval seconds for running status..."
+            // Waiting for the cluster to be ready
+
+            String status = ""
+            int tries = 0
+            while (status != "running" && tries < retries) {
+                tries++
+                if (logging) {
+                    echo "DO K8S Cluster - waiting $interval seconds for running status..."
+                }
+                //noinspection GroovyAssignabilityCheck
+                sleep(time: interval, unit: 'SECONDS')
+                def clusterStatusResponse = httpRequest(
+                        url: "$url/$clusterId",
+                        acceptType: "APPLICATION_JSON",
+                        customHeaders: [[
+                                                name     : "Authorization",
+                                                value    : "Bearer ${TOKEN}",
+                                                maskValue: true,
+                                        ]],
+                        httpMode: "GET",
+                )
+                def clusterStatus = readJSON(text: clusterStatusResponse.content)
+                status = clusterStatus.kubernetes_cluster.status.state
+                if (logging) {
+                    echo "DO K8S Cluster - status = $status"
+                }
             }
-            //noinspection GroovyAssignabilityCheck
-            sleep(time: interval, unit: 'SECONDS')
-            def clusterStatusResponse = httpRequest(
-                    url: "$url/$clusterId",
-                    acceptType: "APPLICATION_JSON",
+
+            if (status != "running") {
+                throw new IllegalStateException("Could not create the cluster in less than ${retries * interval} seconds.")
+            } else if (logging) {
+                echo "DO K8S Cluster - running"
+            }
+
+            // Getting the configuration file
+
+            if (logging) {
+                echo "DO K8S Cluster - getting connection configuration..."
+            }
+            def clusterConfigResponse = httpRequest(
+                    url: "$url/$clusterId/kubeconfig",
                     customHeaders: [[
                                             name     : "Authorization",
                                             value    : "Bearer ${TOKEN}",
@@ -105,44 +134,38 @@ def call(Map<String, ?> params, Closure body) {
                                     ]],
                     httpMode: "GET",
             )
-            def clusterStatus = readJSON(text: clusterStatusResponse.content)
-            status = clusterStatus.kubernetes_cluster.status.state
-            if (logging) {
-                echo "DO K8S Cluster - status = $status"
+            def clusterConfig = clusterConfigResponse.content as String
+
+            // OK, consolidate the cluster information
+            def cluster = new K8SCluster(
+                    params,
+                    clusterId,
+                    clusterConfig
+            )
+
+            echo "DO K8S Cluster - cluster $clusterId being ready."
+
+            // Runs the code
+            body(cluster)
+
+        } finally {
+
+            if (destroy) {
+                if (logging) {
+                    echo "DO K8S Cluster - cluster $clusterId being destroyed..."
+                }
+                httpRequest(
+                        url: "$url/$clusterId",
+                        customHeaders: [[
+                                                name     : "Authorization",
+                                                value    : "Bearer ${TOKEN}",
+                                                maskValue: true,
+                                        ]],
+                        httpMode: "DELETE",
+                )
             }
+
         }
-
-        if (status != "running") {
-            throw new IllegalStateException("Could not create the cluster in less than ${retries * interval} seconds.")
-        } else if (logging) {
-            echo "DO K8S Cluster - running"
-        }
-
-        // Getting the configuration file
-
-        if (logging) {
-            echo "DO K8S Cluster - getting connection configuration..."
-        }
-        def clusterConfigResponse = httpRequest(
-                url: "$url/$clusterId/kubeconfig",
-                customHeaders: [[
-                                        name     : "Authorization",
-                                        value    : "Bearer ${TOKEN}",
-                                        maskValue: true,
-                                ]],
-                httpMode: "GET",
-        )
-        def clusterConfig = clusterConfigResponse.content as String
-
-        // OK, consolidate the cluster information
-        def cluster = new K8SCluster(
-                params,
-                clusterId,
-                clusterConfig
-        )
-
-        // Runs the code
-        body(cluster)
 
     }
 }
