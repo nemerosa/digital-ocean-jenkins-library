@@ -47,6 +47,21 @@ def call(Map<String, ?> params, Closure body) {
         if (logging) {
             echo "DO K8S Cluster - creation..."
         }
+        def clusterCreationRequest = JsonUtils.toJsonString([
+                name      : name,
+                region    : region,
+                version   : version,
+                node_pools: pools.collect { pool ->
+                    [
+                            name : pool.name,
+                            count: pool.count,
+                            size : pool.size,
+                    ]
+                }
+        ])
+        if (logging) {
+            echo "DO K8S Cluster - request: $clusterCreationRequest"
+        }
         def clusterCreationResponse = httpRequest(
                 url: "$url",
                 acceptType: "APPLICATION_JSON",
@@ -57,18 +72,7 @@ def call(Map<String, ?> params, Closure body) {
                                 ]],
                 httpMode: "POST",
                 contentType: "APPLICATION_JSON",
-                requestBody: JsonUtils.toJsonString([
-                        name      : name,
-                        region    : region,
-                        version   : version,
-                        node_pools: pools.collect { pool ->
-                            [
-                                    name : pool.name,
-                                    count: pool.count,
-                                    size : pool.size,
-                            ]
-                        }
-                ]),
+                requestBody: clusterCreationRequest,
         )
         def clusterCreation = readJSON(text: clusterCreationResponse.content)
         def clusterId = clusterCreation.kubernetes_cluster.id as String
