@@ -9,7 +9,7 @@ def call(Map<String, ?> params, Closure body) {
     String credentials = ParamUtils.getParam(params, "credentials")
     String name = ParamUtils.getParam(params, "name")
     String region = ParamUtils.getParam(params, "region")
-    String version = ParamUtils.getParam(params, "region", "1.13.1-do.2")
+    String version = ParamUtils.getParam(params, "version", "1.13.1-do.2")
 
     String url = "https://api.digitalocean.com/v2/kubernetes/clusters"
 
