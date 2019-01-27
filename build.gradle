@@ -1,0 +1,41 @@
+plugins {
+    id "net.nemerosa.versioning" version "2.7.1"
+}
+
+apply plugin: 'groovy'
+
+group = "net.nemerosa.jenkins.pipeline"
+version = versioning.info.display
+
+sourceSets {
+    main {
+        groovy.srcDirs = [
+                "src",
+                "vars"
+        ]
+    }
+    test {
+        groovy.srcDirs = [
+                "test"
+        ]
+    }
+}
+
+repositories {
+    maven {
+        url = 'http://repo.jenkins-ci.org/public/'
+    }
+}
+
+dependencies {
+
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    compile 'javax.servlet:javax.servlet-api:3.1.0'
+
+    compile 'org.jenkins-ci.main:jenkins-core:2.107.3'
+    compile 'com.cloudbees:groovy-cps:1.10'
+
+    compile 'org.jenkins-ci.plugins:credentials:2.1.17@jar'
+
+    testCompile 'junit:junit:1.12'
+}
