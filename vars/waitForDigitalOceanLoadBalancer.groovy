@@ -18,7 +18,7 @@ def call(Map<String, ?> params) {
         if (status == 0) {
             def json = readJSON(file: "service.json")
             if (logging) echo "JSON = $json"
-            ip = json.status?.loadBalancer?.ingress?.first()?.ip?.text()
+            ip = json.status?.loadBalancer?.ingress?.first()?.ip
             if (!ip) {
                 sleep(time: interval, unit: 'SECONDS')
             }
