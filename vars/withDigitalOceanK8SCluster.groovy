@@ -151,6 +151,10 @@ def call(Map<String, ?> params, Closure body) {
                 echo "DO K8S Cluster - cluster $clusterId config written in $configFile"
             }
 
+            environment {
+                KUBECONFIG = "${env.WORKSPACE}/.kubeconfig"
+            }
+
             // OK, consolidate the cluster information
             def cluster = new K8SCluster(
                     params,
@@ -161,8 +165,11 @@ def call(Map<String, ?> params, Closure body) {
                 echo "DO K8S Cluster - cluster $clusterId being ready."
             }
 
-            // Runs the code
-            body(cluster)
+            // Sets the KUBECONFIG environment
+            withEnv(["KUBECONFIG=${env.WORKSPACE}/${configFile}"]) {
+                // Runs the code
+                body(cluster)
+            }
 
         } finally {
 
