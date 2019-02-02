@@ -71,6 +71,8 @@ withDigitalOceanK8SCluster(
 
 ## Authentication
 
+In tasks where the [Digital Ocean API](https://developers.digitalocean.com/documentation/) is accessed, a [Personal Access Token](https://cloud.digitalocean.com/account/api/tokens) must be provided and stored as a Jenkins credentials entry accessible by your pipeline or job. The type of the credentials must be "Secret Text" and the ID of the credentials entry will be used as the `credentials` parameter of the step.
+
 ## Installation
 
 ## Prerequisites
