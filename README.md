@@ -7,6 +7,11 @@ It provides some tasks to interact with Digital Ocean services like Kubernetes c
 
 > It's a very early version. While provided steps *do* work, only very few features are covered.
 
+## Table of contents
+
+* [Examples](#examples)
+* [Contributing](#contributing)
+
 ## Examples
 
 ### Creating a cluster for running some tests
