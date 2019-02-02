@@ -7,6 +7,48 @@ It provides some tasks to interact with Digital Ocean services like Kubernetes c
 
 > It's a very early version. While provided steps *do* work, only very few features are covered.
 
+## Examples
+
+### Creating a cluster for running some tests
+
+Given a `deployment.yaml` in the workspace, one can:
+
+1. create a K8S cluster in Digital Ocean
+1. apply the deployment in this cluster
+1. wait for the service(s) to be available
+1. run some tests
+1. tear down the deployment
+1. remove the K8S cluster
+
+This is achieved by running the following code in your `Jenkinsfile`:
+
+```groovy
+withDigitalOceanK8SCluster(
+        logging: true,
+        credentials: "MY_DO_CREDENTIALS",
+        name: "jenkins-${env.BUILD_NUMBER}",
+        region: "ams3",
+        version: "1.13.1-do.2",
+        pools: [[
+          name : "jenkins-${env.BUILD_NUMBER}"
+          count: 2,
+          size : "s-1vcpu-2gb"
+        ]]
+) { cluster ->
+    withDeployment(file: "deployment.yaml") {
+        waitForDigitalOceanLoadBalancer(
+                service: "my-service",
+                outputVariable: "MY_SERVICE_IP",
+                logging: true,
+        )
+        echo "Service IP = ${env.MY_SERVICE_IP}"
+        // Runs the tests against load balancer at MY_SERVICE_IP
+    }
+    // Here, the deployment has been deleted
+}
+// Here, the cluster has been destroyed
+```
+
 ## Steps
 
 ### Digital Ocean specific tasks
