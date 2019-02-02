@@ -12,6 +12,7 @@ It provides some tasks to interact with Digital Ocean services like Kubernetes c
 ### Digital Ocean specific tasks
 
 * [`withDigitalOceanK8SCluster`](vars/withDigitalOceanK8SCluster.md) - creates a [Digital Ocean Kubernetes cluster](https://www.digitalocean.com/products/kubernetes/) and allows some code to run against it.
+* [`waitForDigitalOceanLoadBalancer`](vars/waitForDigitalOceanLoadBalancer.md) - waits for a [Digital Ocean load balancer](https://www.digitalocean.com/products/load-balancer/) created by a service to be ready.
 
 ### K8S steps
 
