@@ -37,6 +37,8 @@ The `withDigitalOceanK8SCluster` step body is closure having a parameter with fo
 * `id` - ID of the Digital Ocean cluster
 * `params` - parameters of the step
 
+Entering the body, the `kubectl` environment is configured to use the K8S config file defined by the `configFile` parameter.
+
 ### Example
 
 ```groovy
