@@ -10,6 +10,10 @@ It provides some tasks to interact with Digital Ocean services like Kubernetes c
 ## Table of contents
 
 * [Examples](#examples)
+* [Steps](#steps)
+* [Authentication](#authentication)
+* [Installation](#installation)
+* [Prerequisites](#prerequisites)
 * [Contributing](#contributing)
 
 ## Examples
