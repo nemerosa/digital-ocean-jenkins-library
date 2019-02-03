@@ -75,6 +75,8 @@ In tasks where the [Digital Ocean API](https://developers.digitalocean.com/docum
 
 ## Prerequisites
 
+This library depends on the [`http_request`](https://plugins.jenkins.io/http_request) plugin to be installed.
+
 The K8S steps require `kubectl` to be available. It can be made available in the build environment though a Docker image (preferred) or installed in the agent directly.
 
 ## Installation
