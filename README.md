@@ -12,8 +12,8 @@ It provides some tasks to interact with Digital Ocean services like Kubernetes c
 * [Examples](#examples)
 * [Steps](#steps)
 * [Authentication](#authentication)
-* [Installation](#installation)
 * [Prerequisites](#prerequisites)
+* [Installation](#installation)
 * [Contributing](#contributing)
 
 ## Examples
@@ -73,8 +73,37 @@ withDigitalOceanK8SCluster(
 
 In tasks where the [Digital Ocean API](https://developers.digitalocean.com/documentation/) is accessed, a [Personal Access Token](https://cloud.digitalocean.com/account/api/tokens) must be provided and stored as a Jenkins credentials entry accessible by your pipeline or job. The type of the credentials must be "Secret Text" and the ID of the credentials entry will be used as the `credentials` parameter of the step.
 
+## Prerequisites
+
 ## Installation
 
-## Prerequisites
+Before being used by your pipeline definitions, this library must be registered in your Jenkins installation.
+
+Using the Jenkins management interface, you can declare this library the following way:
+
+![Jenkins pipeline library](docs/Configure_System_Jenkins.png)
+
+> Refer to the [Jenkins documentation](https://jenkins.io/doc/book/pipeline/shared-libraries/) to know how to perform this registration.
+
+You can also use [Jenkins Configuration as Code](https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/README.md):
+
+```YAML
+unclassified:
+  globallibraries:
+    libraries:
+      - name: "digital-ocean-jenkins-library"
+        retriever:
+          modernSCM:
+            scm:
+              github:
+                repoOwner: "nemerosa"
+                repository: "digital-ocean-jenkins-library"
+```
+
+When the library is registered, you can use it in your `Jenkinsfile`s:
+
+```groovy
+@Library("digital-ocean-jenkins-library@master") _
+```
 
 ## Contributing
