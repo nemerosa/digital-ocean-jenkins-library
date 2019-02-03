@@ -109,3 +109,5 @@ When the library is registered, you can use it in your `Jenkinsfile`s:
 ```
 
 ## Contributing
+
+Contributions for this library are very welcome: ideas, new steps, fixes, features, issues, pull requests.
